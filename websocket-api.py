@@ -1,5 +1,5 @@
 import asyncio, json, threading, websockets
-from flask import Flask
+from flask import Flask, request
 from flask_cors import CORS, cross_origin
 from json.decoder import JSONDecodeError
 import api_data
@@ -135,6 +135,13 @@ web_api = Flask(__name__)
 cors = CORS(web_api)
 web_api.config["CORS_HEADERS"] = "Content-Type"
 
+def _build_cors_preflight_response():
+    response = web_api.response_class()
+    response.headers.add("Access-Control-Allow-Origin", "*")
+    response.headers.add('Access-Control-Allow-Headers', "*")
+    response.headers.add('Access-Control-Allow-Methods', "*")
+    return response
+
 def gen_resp(status, data):
     response = web_api.response_class(
         response=json.dumps(data),
@@ -145,14 +152,14 @@ def gen_resp(status, data):
     return response
 
 @web_api.route('/clients', methods=['GET'])
-@cross_origin
 def web_clients():
     status, data = api_data.get_clients()
     return gen_resp(status, data) 
 
-@web_api.route('/nick', methods=['POST'])
-@cross_origin
+@web_api.route('/nick', methods=['POST', 'OPTIONS'])
 def web_nick():
+    if request.method == "OPTIONS": # CORS preflight
+        return _build_cors_preflight_response()
     request_data = request.get_json()
     player = get_player(parse_mac(request_data))
     if player and "nick" in request_data and type(request_data["nick"]) == str:
@@ -160,9 +167,10 @@ def web_nick():
         return gen_resp(200, None)
     return gen_resp(500, None)
 
-@web_api.route('/startcal', methods=['POST'])
-@cross_origin
+@web_api.route('/startcal', methods=['POST', 'OPTIONS'])
 def web_startcal():
+    if request.method == "OPTIONS": # CORS preflight
+        return _build_cors_preflight_response()
     request_data = request.get_json()
     player = get_player(parse_mac(request_data))
     if player:
@@ -171,9 +179,10 @@ def web_startcal():
         return gen_resp(200, None)
     return gen_resp(500, None)
 
-@web_api.route('/ident', methods=['POST'])
-@cross_origin
+@web_api.route('/ident', methods=['POST', 'OPTIONS'])
 def web_ident():
+    if request.method == "OPTIONS": # CORS preflight
+        return _build_cors_preflight_response()
     request_data = request.get_json()
     player = get_player(parse_mac(request_data))
     if player:
@@ -181,9 +190,10 @@ def web_ident():
         return gen_resp(200, None)
     return gen_resp(500, None)
 
-@web_api.route('/start', methods=['POST'])
-@cross_origin
+@web_api.route('/start', methods=['POST', 'OPTIONS'])
 def web_start():
+    if request.method == "OPTIONS": # CORS preflight
+        return _build_cors_preflight_response()
     request_data = request.get_json()
     if game_status["running"]:
         return gen_resp(500, {"message": "Game already running"})
@@ -201,15 +211,15 @@ def web_start():
         return gen_resp(200, None)
     return gen_resp(500, None)
 
-@web_api.route('/stop', methods=['POST'])
-@cross_origin
+@web_api.route('/stop', methods=['POST', 'OPTIONS'])
 def web_stop():
+    if request.method == "OPTIONS": # CORS preflight
+        return _build_cors_preflight_response()
     if not game_status["running"]:
         return gen_resp(500, {"message": "Game not running"})
     game_status["running"] = False
 
 @web_api.route('/state', methods=['GET'])
-@cross_origin
 def web_state():
     return gen_resp(200, {
         "game_running": game_status["running"],
