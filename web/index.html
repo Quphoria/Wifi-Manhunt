@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en" class="fontawesome-i2svg-active fontawesome-i2svg-complete">
+
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="author" content="Samuel Simpson">
+    <link rel="icon" href="images/favicon.ico">
+    <title>Wifi Manhunt</title>
+    <!-- Font Awesome CSS -->
+    <link rel="stylesheet" href="libs/fontawesome-5.15.1/font-awesome.min.css">
+    <!-- Remix icon CSS -->
+    <link rel="stylesheet" href="libs/remixicon-2.5.0/remixicon.css">
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="libs/bootstrap-4.3.1/bootstrap.min.css">
+    <!-- Roboto CSS -->
+    <link rel="stylesheet" href="libs/fonts/roboto/roboto.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="css/stylesheet.css">
+</head>
+
+<body id=about style="font-family: Roboto, sans-serif;" class="mh-100 h-100 overflow-hidden">
+    <div id="errorModal" class="modal hide fade" tabindex="-1" role="alertdialog">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 id="errorModalTitle" class="modal-title text-danger">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        &nbsp;Error
+                    </h5>
+                </div>
+                <div class="modal-body">
+                    <p id="errorModalBody">Modal body text goes here.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal" data-bs-dismiss="modal">
+                        Close
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="wrapper bg-secondary text-light mh-100 vh-100 d-flex flex-row justify-content-between overflow-hidden flex-shrink-1">
+
+        <!-- Content -->
+        <div id="content" class="p-4 bg-secondary text-light flex-fill d-flex flex-column">
+            <h1>Wifi Manhunt</h1>
+            <div class="alert alert-info">
+                Status: <span id="game_status">Unknown</span>
+            </div>
+            <div class="d-flex flex-row">
+                <button id="game_start" type="button" class="btn btn-success mx-2">Start</button>
+                <button id="game_stop" type="button" class="btn btn-danger mx-2">Stop</button>
+                <div class="d-flex flex-row align-items-center">
+                    <span class="mx-2 align-middle">Imposters: </span>
+                    <input type="number" class="form-control ml-1 mr-2" value=1 placeholder="Number of imposters" aria-label="Imposter number">
+                </div>
+            </div>
+            <div id="client_table" class="m-4">
+                <table class="table table-dark">
+                    <thead>
+                        <tr>
+                            <th scope="col">MAC</th>
+                            <th scope="col">Nick</th>
+                            <th scope="col">Alive</th>
+                            <th scope="col">RSSI Threshold</th>
+                            <th scope="col">Nick</th>
+                            <th scope="col">Cal</th>
+                            <th scope="col">Ident</th>
+                        </tr>
+                    </thead>
+                    <template id="clientrow">
+                        <tr>
+                            <th scope="row" class="client-mac">MACADDR</th>
+                            <td class="client-nick">Test123</td>
+                            <td class="client-alive">Yes</td>
+                            <td class="client-rssi-t">-10</td>
+                            <td class="">
+                                <button type="button" class="client-set-nick btn btn-primary mx-2">Set Nickname</button>
+                            </td>
+                            <td class="">
+                                <button type="button" class="client-cal btn btn-danger mx-2">Calibrate</button>
+                            </td>
+                            <td class="">
+                                <button type="button" class="client-ident btn btn-info mx-2">Identify</button>
+                            </td>
+                        </tr>
+                    </template>
+                    <tbody id="clienttablebody">
+                        
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>
+
+<!-- JavaScript loaded at end -->
+<!-- jQuery first, then Popper.js, then Bootstrap JS, then Fontawesome, and then custom JS scripts -->
+<script src="libs/jquery-3.1.1/jquery.min.js"></script>
+<script src="libs/popper.js-1.14.7/popper.min.js"></script>
+<script src="libs/bootstrap-4.3.1/bootstrap.min.js"></script>
+<script src="libs/fontawesome-5.15.1/all.js"></script>
+<!-- Custom JS -->
+<script src="js/game.js"></script>
