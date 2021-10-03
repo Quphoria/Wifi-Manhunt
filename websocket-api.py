@@ -120,7 +120,7 @@ def parse_request(message: str) -> str:
 async def api(websocket, path):
     print(f"{path=}")
     if path == "/":
-        await websocket.send("Ready")
+        print("WEBSOCKET CONNECTION")
         async for message in websocket:
             r = parse_request(message)
             if r:
@@ -209,7 +209,7 @@ def web_state():
 
 async def main():
     print("Starting websockets server on port 8765")
-    async with websockets.serve(api, "localhost", 8765):
+    async with websockets.serve(api, "0.0.0.0", 8765):
         await asyncio.Future()  # run forever
 
 if __name__ == "__main__":
