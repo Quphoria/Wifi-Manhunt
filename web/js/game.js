@@ -7,8 +7,7 @@ function get_state() {
   })
   $.getJSON(api_url + "/clients", (data) => {
     console.log(data);
-    // load_clients(data.clients);
-    // $("#game_status").text(data.status);
+    load_clients(data.clients);
   })
 }
 
@@ -80,12 +79,12 @@ $(function(){
       //code goes here that will be run every second.    
     }, 1000);
 
-    create_row({
-      "mac": "BCFF4D82538E",
-      "nick": "TestPLZ",
-      "cal_rssi_threshold": -21,
-      "alive": true
-    });
+    // create_row({
+    //   "mac": "BCFF4D82538E",
+    //   "nick": "TestPLZ",
+    //   "cal_rssi_threshold": -21,
+    //   "alive": true
+    // });
 
     $("#game_start").click(() => {
       post_req("/start", {"imposters": [
