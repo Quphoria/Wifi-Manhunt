@@ -1,5 +1,6 @@
 import asyncio, json, threading, websockets
 from flask import Flask
+from flask_cors import CORS, cross_origin
 from json.decoder import JSONDecodeError
 import api_data
 
@@ -131,6 +132,8 @@ async def api(websocket, path):
             await websocket.send(message)
 
 web_api = Flask(__name__)
+cors = CORS(web_api)
+app.config["CORS_HEADERS"] = "Content-Type"
 
 def gen_resp(status, data):
     response = web_api.response_class(
@@ -142,11 +145,13 @@ def gen_resp(status, data):
     return response
 
 @web_api.route('/clients', methods=['GET'])
+@cross_origin
 def web_clients():
     status, data = api_data.get_clients()
     return gen_resp(status, data) 
 
 @web_api.route('/nick', methods=['POST'])
+@cross_origin
 def web_nick():
     request_data = request.get_json()
     player = get_player(parse_mac(request_data))
@@ -156,6 +161,7 @@ def web_nick():
     return gen_resp(500, None)
 
 @web_api.route('/startcal', methods=['POST'])
+@cross_origin
 def web_startcal():
     request_data = request.get_json()
     player = get_player(parse_mac(request_data))
@@ -166,6 +172,7 @@ def web_startcal():
     return gen_resp(500, None)
 
 @web_api.route('/ident', methods=['POST'])
+@cross_origin
 def web_ident():
     request_data = request.get_json()
     player = get_player(parse_mac(request_data))
@@ -175,6 +182,7 @@ def web_ident():
     return gen_resp(500, None)
 
 @web_api.route('/start', methods=['POST'])
+@cross_origin
 def web_start():
     request_data = request.get_json()
     if game_status["running"]:
@@ -194,12 +202,14 @@ def web_start():
     return gen_resp(500, None)
 
 @web_api.route('/stop', methods=['POST'])
+@cross_origin
 def web_stop():
     if not game_status["running"]:
         return gen_resp(500, {"message": "Game not running"})
     game_status["running"] = False
 
 @web_api.route('/state', methods=['GET'])
+@cross_origin
 def web_state():
     return gen_resp(200, {
         "game_running": game_status["running"],
