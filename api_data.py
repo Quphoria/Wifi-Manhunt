@@ -54,21 +54,26 @@ class Player:
 
 def save_players():
     player_data = []
-    for player in Player.players:
+    for p in Player.players:
+        player = Player.players[p]
         player_data.append(player.save())
     with open("playerdb.json", "w") as f:
         json.dump(player_data, f)
 
 def load_players():
-    with open("playerdb.json") as f:
-        player_data = json.load(f) 
-        if player_data and type(player_data) == list:
-            for player in player_data:
-                Player.load(player)
+    try:
+        with open("playerdb.json") as f:
+            player_data = json.load(f) 
+            if player_data and type(player_data) == list:
+                for player in player_data:
+                    Player.load(player)
+    except:
+        pass
 
 def get_clients():
     clients = []
-    for player in Player.players:
+    for p in Player.players:
+        player = Player.players[p]
         if player.joined:
             clients.append({
                 "mac": player.mac,
@@ -83,6 +88,7 @@ def get_clients():
     }
 
 def set_all_alive(alive = True):
-    for player in Player.players:
+    for p in Player.players:
+        player = Player.players[p]
         if player.is_ready():
             player.alive = alive

@@ -4,6 +4,7 @@ function get_state() {
   $.getJSON(api_url + "/state", (data) => {
     console.log(data);
     $("#game_status").text(data.status);
+    $("#GameRunning").text(data.game_running ? "Running" : "Stopped");
   })
   $.getJSON(api_url + "/clients", (data) => {
     console.log(data);

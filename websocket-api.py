@@ -62,6 +62,7 @@ def client_cal(content):
             cal_sig = next(s for s in signals if s.essid == cal_essid)
             player.rssi_threshold = cal_sig.rssi
             player.cal = False
+            api_data.save_players()
             return 200, get_status(player)
     return 400, None
 
@@ -73,6 +74,7 @@ def client_rssi(content):
             player.last_signals = signals
 
             if game_status["running"] and not player.alive:
+                print("RSSI:", player.nick, signals)
                 for signal in signals:
                     if signal.rssi > player.rssi_threshold:
                         t_mac = signal.essid
@@ -164,6 +166,7 @@ def web_nick():
     player = get_player(parse_mac(request_data))
     if player and "nick" in request_data and type(request_data["nick"]) == str:
         player.nick = request_data["nick"]
+        api_data.save_players()
         return gen_resp(200, None)
     return gen_resp(500, None)
 
@@ -223,7 +226,7 @@ def web_stop():
 def web_state():
     return gen_resp(200, {
         "game_running": game_status["running"],
-        "clients": len([p for p in api_data.Player.players if p.joined]),
+        "clients": len([api_data.Player.players[p] for p in api_data.Player.players if api_data.Player.players[p].joined]),
         "status": game_status["status"]
     })
 
@@ -233,6 +236,7 @@ async def main():
         await asyncio.Future()  # run forever
 
 if __name__ == "__main__":
+    api_data.load_players()
     t = threading.Thread(target=lambda: web_api.run(host="0.0.0.0", port="8080", debug=True, use_reloader=False), daemon=True)
     t.start()
     asyncio.run(main())
