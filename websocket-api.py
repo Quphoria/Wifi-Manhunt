@@ -133,7 +133,7 @@ async def api(websocket, path):
 
 web_api = Flask(__name__)
 cors = CORS(web_api)
-app.config["CORS_HEADERS"] = "Content-Type"
+web_api.config["CORS_HEADERS"] = "Content-Type"
 
 def gen_resp(status, data):
     response = web_api.response_class(
