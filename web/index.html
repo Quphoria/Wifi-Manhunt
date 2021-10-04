@@ -42,7 +42,8 @@
         </div>
     </div>
 
-    <div class="wrapper bg-secondary text-light mh-100 vh-100 d-flex flex-row justify-content-between overflow-hidden flex-shrink-1">
+    <div
+        class="wrapper bg-secondary text-light mh-100 vh-100 d-flex flex-row justify-content-between overflow-hidden flex-shrink-1">
 
         <!-- Content -->
         <div id="content" class="p-4 bg-secondary text-light flex-fill d-flex flex-column">
@@ -55,10 +56,11 @@
                 <button id="game_stop" type="button" class="btn btn-danger mx-2">Stop</button>
                 <div class="d-flex flex-row align-items-center">
                     <span class="mx-2 align-middle">Imposters: </span>
-                    <input type="number" class="form-control ml-1 mr-2" value=1 placeholder="Number of imposters" aria-label="Imposter number">
+                    <input type="number" class="form-control ml-1 mr-2" value=1 placeholder="Number of imposters"
+                        aria-label="Imposter number">
                 </div>
                 <div class="d-flex flex-row align-items-center">
-                    <div class="mx-2 align-middle">Game <span id="GameRunning">Unknown</span></div>
+                    <div class="mx-2 align-middle">Game <span id="game_running">Unknown</span></div>
                 </div>
             </div>
             <div id="client_table" class="m-4">
@@ -92,7 +94,7 @@
                         </tr>
                     </template>
                     <tbody id="clienttablebody">
-                        
+
                     </tbody>
                 </table>
             </div>

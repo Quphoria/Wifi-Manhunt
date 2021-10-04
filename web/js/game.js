@@ -1,10 +1,10 @@
-const api_url = "http://localhost:8080"
+const api_url = "http://localhost:8080";
 
 function get_state() {
   $.getJSON(api_url + "/state", (data) => {
     console.log(data);
     $("#game_status").text(data.status);
-    $("#GameRunning").text(data.game_running ? "Running" : "Stopped");
+    $("#game_running").text(data.game_running ? "Running" : "Stopped");
   })
   $.getJSON(api_url + "/clients", (data) => {
     console.log(data);
@@ -31,6 +31,8 @@ function cal_client(event) {
 }
 
 function load_clients(data) {
+  // Yes I know its ugly because it doesn't dynamically update rows
+  // But it works
   $("#clienttablebody").empty();
   for (client of data) {
     create_row(client);
@@ -39,8 +41,11 @@ function load_clients(data) {
 
 function create_row(data) {
   var template = $("#clientrow").html();
+  // Create new row using template row
   var new_row = $(template);
   new_row.appendTo("#clienttablebody");
+
+  // Fill in template data
   new_row.find('[class*="client-mac"]').first().text(data.mac);
   new_row.find('[class*="client-nick"]').first().text(data.nick);
   new_row.find('[class*="client-rssi-t"]').first().text(data.cal_rssi_threshold);
@@ -62,7 +67,6 @@ async function post_req(path, data) {
     credentials: 'same-origin', // include, *same-origin, omit
     headers: {
       'Content-Type': 'application/json'
-      // 'Content-Type': 'application/x-www-form-urlencoded',
     },
     redirect: 'follow', // manual, *follow, error
     referrerPolicy: 'no-referrer', // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
@@ -73,36 +77,37 @@ async function post_req(path, data) {
 
 
 
-$(function(){
-    // This code runs after the document ready.
-    setInterval(function(){ 
-      get_state();
-      //code goes here that will be run every second.    
-    }, 1000);
+$(function () {
+  // This code runs after the document ready.
+  setInterval(function () {
+    get_state();
+    //code goes here that will be run every second.    
+  }, 1000);
 
-    // create_row({
-    //   "mac": "BCFF4D82538E",
-    //   "nick": "TestPLZ",
-    //   "cal_rssi_threshold": -21,
-    //   "alive": true
-    // });
+  /* 
+  create_row({
+    "mac": "BCFF4D82538E",
+    "nick": "TestPLZ",
+    "cal_rssi_threshold": -21,
+    "alive": true
+  });
+  */
 
-    $("#game_start").click(() => {
-      post_req("/start", {"imposters": [
+  $("#game_start").click(() => {
+    post_req("/start", {
+      "imposters": [
         "BCFF4D82538F"
-      ]});
+      ]
     });
+  });
 
-    $("#game_stop").click(() => {
-      post_req("/stop", {});
-    });
+  $("#game_stop").click(() => {
+    post_req("/stop", {});
+  });
 });
 
 /*
-const body = 'Cannot access projects.json<br>' +
-          "<code>" + e.status + ": " + e.statusText + "</code>";
-        $('#errorModalBody').html(body);
-        $('#errorModal').modal('show');
-   */
-
-    
+  Calling the error modal
+  $('#errorModalBody').html("body html");
+  $('#errorModal').modal('show');
+*/
