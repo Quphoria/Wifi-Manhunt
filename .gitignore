@@ -1,5 +1,8 @@
 
-
+# server files
 env/
 __pycache__
 playerdb.json
+
+# hardware files
+config.h

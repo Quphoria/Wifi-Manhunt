@@ -2,16 +2,11 @@
 #include <ESP8266WiFi.h>
 #include <ArduinoWebsockets.h>
 
+#include "config.h"
+
 // Defines
-#define BaseWiFiSSID "espbasestation"
-#define BaseWiFiPass "espbase69"
-#define GamePrefix   "game-"
-
-#define WebsocketServer "192.168.11.182:8765"
-
 #define LEDPin1 D0
 #define LEDPin2 D4
-
 
 // global vars
 bool alive = 0;
