@@ -80,7 +80,8 @@ def get_clients():
                 "nick": player.nick,
                 "signals": [{"essid": s.essid, "rssi": s.rssi} for s in player.last_signals],
                 "cal_rssi_threshold": player.rssi_threshold,
-                "alive": player.alive
+                "alive": player.alive,
+                "ready": player.is_ready()
             })
 
     return 200, {
