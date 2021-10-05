@@ -59,17 +59,15 @@ void wsMessageCallback(websockets::WebsocketsMessage message) {
 }
 
 bool ledsOn = 0;
+void setLeds(bool state) {
+  ledsOn = state;
+  digitalWrite(LEDPin1, !state);
+  digitalWrite(LEDPin2, !state);
+}
+
 //Invert LEDs
 void ledInvert(){
-  if (ledsOn == 0){
-    digitalWrite(LEDPin1, HIGH);
-    digitalWrite(LEDPin2, HIGH);
-    ledsOn = 1;
-  } else {
-    digitalWrite(LEDPin1, LOW);
-    digitalWrite(LEDPin2, LOW);
-    ledsOn = 0;
-  }
+  setLeds(!ledsOn);
 }
 
 // send websocket payload
@@ -196,9 +194,7 @@ void testWiFiConnection(){
 
 void loop() {
   if (do_cal){
-    ledsOn = 0;
-    digitalWrite(LEDPin1, LOW);
-    digitalWrite(LEDPin2, LOW);
+    setLeds(0);
     while(digitalRead(0)){
       ledInvert(); delay(50);
       ledInvert(); delay(50);
@@ -209,7 +205,7 @@ void loop() {
     do_cal = 0;
   } else if (ready && game_running) {
     if (alive != ledsOn) {
-      ledInvert();
+      setLeds(alive);
     }
     if(!alive){
       WiFiScan("rssi");
