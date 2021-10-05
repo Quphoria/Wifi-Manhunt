@@ -121,17 +121,15 @@ def parse_request(message: str) -> str:
     return resp
 
 async def api(websocket, path):
-    print(f"{path=}")
-    if path == "/":
-        print("WEBSOCKET CONNECTION")
-        async for message in websocket:
-            r = parse_request(message)
-            if r:
-                await websocket.send(r)
-            
-    elif path == "/ping":
-        async for message in websocket:
-            await websocket.send(message)
+    print("Connection from", websocket.remote_address)
+    try:
+        if path == "/":
+            async for message in websocket:
+                r = parse_request(message)
+                if r:
+                    await websocket.send(r)
+    except websockets.exceptions.ConnectionClosedError:
+        print("Websocket connection closed:", websocket.remote_address)
 
 web_api = Flask(__name__)
 cors = CORS(web_api)
