@@ -4,6 +4,8 @@
 
 ESP8266
 
+Used module: `NodeMCU 1.0 (ESP-12E Module)`
+
 ## Wifi Manhunt Python Server
 
 ### Creating the virtual environment
