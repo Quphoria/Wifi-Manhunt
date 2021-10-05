@@ -197,8 +197,11 @@ void loop() {
     setLeds(0);
     while(digitalRead(0)){
       ledInvert(); delay(50);
+      if(digitalRead(0)) {break;}
       ledInvert(); delay(50);
+      if(digitalRead(0)) {break;}
       ledInvert(); delay(50);
+      if(digitalRead(0)) {break;}
       ledInvert(); delay(350);
     }
     WiFiScan("cal");
