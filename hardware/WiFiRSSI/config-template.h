@@ -7,12 +7,12 @@
 
 // Backend wifi credentials
 #define BaseWiFiSSID "backend-wifi-ssid"
-#define BaseWiFiPass "backend-wifi-password
+#define BaseWiFiPass "backend-wifi-password"
 
 // Prefix for game networks
 #define GamePrefix   "game-"
 
 // Api server address
-#define WebsocketServer "192.168.11.182:8765"
+#define WebsocketServer "ws://192.168.11.182:8765/"
 
 #endif

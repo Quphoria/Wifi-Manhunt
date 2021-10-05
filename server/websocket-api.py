@@ -91,12 +91,20 @@ def client_status(content):
         return 200, get_status(player)
     return 400, None
 
+def client_done_ident(content):
+    player = get_player(parse_mac(content))
+    if player:
+        player.do_ident()
+        return 200, get_status(player)
+    return 400, None
+
 api_methods = {
     # Client methods
     "join": client_join,
     "cal": client_cal,
     "rssi": client_rssi,
-    "status": client_status
+    "status": client_status,
+    "ackident": client_done_ident
 }
 
 def parse_request(message: str) -> str:
@@ -128,7 +136,8 @@ async def api(websocket, path):
                 r = parse_request(message)
                 if r:
                     await websocket.send(r)
-    except websockets.exceptions.ConnectionClosedError:
+    except (websockets.exceptions.ConnectionClosedError, OSError):
+        # Sometimes windows has an OSError?
         print("Websocket connection closed:", websocket.remote_address)
 
 web_api = Flask(__name__)
@@ -202,7 +211,7 @@ def web_start():
     if "imposters" in request_data: 
         for mac in request_data["imposters"]:
             player = get_player(mac)
-            if player:
+            if player and player.joined:
                 imposters.append(player)
     api_data.set_all_alive()
     if len(imposters) > 0:
@@ -210,7 +219,7 @@ def web_start():
             player.alive = False
         game_status["running"] = True
         return gen_resp(200, None)
-    return gen_resp(500, None)
+    return gen_resp(500, {"message": "No imposters chosen"})
 
 @web_api.route('/stop', methods=['POST', 'OPTIONS'])
 def web_stop():

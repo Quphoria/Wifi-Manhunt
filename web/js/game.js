@@ -30,6 +30,14 @@ function cal_client(event) {
   });
 }
 
+function id_client(event) {
+  console.log(event);
+  const mac = $(event.target).data("mac");
+  post_req("/ident", {
+    "mac": mac
+  });
+}
+
 function load_clients(data) {
   // Yes I know its ugly because it doesn't dynamically update rows
   // But it works
@@ -57,6 +65,9 @@ function create_row(data) {
   nr_b = new_row.find('[class*="client-cal"]').first();
   nr_b.data("mac", data.mac);
   nr_b.click(cal_client);
+  id_b = new_row.find('[class*="client-ident"]').first();
+  id_b.data("mac", data.mac);
+  id_b.click(id_client);
 }
 
 async function post_req(path, data) {

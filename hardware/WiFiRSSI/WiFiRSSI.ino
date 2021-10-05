@@ -1,3 +1,5 @@
+// Wifi Manhunt
+
 // Includes
 #include <ESP8266WiFi.h>
 #include <ArduinoWebsockets.h>
@@ -15,6 +17,10 @@ bool ready = 0;
 bool do_cal = 0;
 bool do_ident = 0;
 
+unsigned long last_status = 0;
+unsigned long last_status_ping = 0;
+unsigned long status_timeout = 500;
+unsigned long status_ping_timeout = 200;
 
 //function to return MAC address without semicolons
 String getmacid(){
@@ -43,33 +49,35 @@ void wsMessageCallback(websockets::WebsocketsMessage message) {
   Serial.print("Got Message: "); Serial.println(message.data());
   String msgData = message.data();
   if (msgData.charAt(0) == 'S'){ //data valid if S exists
-    alive = msgData.charAt(1);
-    game_running = msgData.charAt(2);
-    ready = msgData.charAt(3);
-    do_cal = msgData.charAt(4);
-    do_ident = msgData.charAt(5);
+    last_status = millis();
+    alive = msgData.charAt(1) == '1';
+    game_running = msgData.charAt(2) == '1';
+    ready = msgData.charAt(3) == '1';
+    do_cal = msgData.charAt(4) == '1';
+    do_ident = msgData.charAt(5) == '1';
   }
-
 }
 
 bool ledsOn = 0;
 //Invert LEDs
 void ledInvert(){
   if (ledsOn == 0){
-    digitalWrite(LEDPin1, LOW);
-    digitalWrite(LEDPin2, LOW);
-    ledsOn = 1;
-  } else {
     digitalWrite(LEDPin1, HIGH);
     digitalWrite(LEDPin2, HIGH);
+    ledsOn = 1;
+  } else {
+    digitalWrite(LEDPin1, LOW);
+    digitalWrite(LEDPin2, LOW);
     ledsOn = 0;
   }
 }
 
 // send websocket payload
-void sendWsPayload(String content, String method){
+void sendWsPayload(String content, String method, bool log){
   String wsPayload = "{\"method\": \"" + method + "\", \"content\": " + content + "}";
-  Serial.println(wsPayload);
+  if (log) {
+    Serial.println(wsPayload);
+  }
   wsClient.send(wsPayload);
 }
 
@@ -77,7 +85,19 @@ void sendWsPayload(String content, String method){
 
 // setup   ####################################################################################
 
-
+void connectWebsocket() {
+  if(wsClient.available(false)) {
+    wsClient.close();
+  }
+  wsClient = {};
+  Serial.println("Websocket Connecting...");
+  //init callback for websockets
+  wsClient.onMessage(wsMessageCallback);
+  wsClient.onEvent(onEventsCallback);
+  wsClient.connect(WebsocketServer);
+  // websocket register with game server
+  sendWsPayload(("{\"mac\": \"" + getmacid() + "\"}"), "join", 1);
+}
 
 void setup()
 {
@@ -110,14 +130,8 @@ void setup()
   Serial.println();
   Serial.print("Connected, IP address: ");
   Serial.println(WiFi.localIP());
-
-  //init callback for websockets
-  wsClient.onMessage(wsMessageCallback);
-  wsClient.onEvent(onEventsCallback);
-  wsClient.connect(WebsocketServer);
-  // websocket register with game server
-  sendWsPayload(("{\"mac\": \"" + getmacid() + "\"}"), "join");
-
+  
+  connectWebsocket();
 }
 
 
@@ -141,12 +155,12 @@ void WiFiScan(String method){
         if(WiFi.SSID(i).startsWith(GamePrefix)){
           if(addComma == 1){wsPayload = wsPayload + ", ";}
           Serial.print(i+1); Serial.print(". "); Serial.print(WiFi.SSID(i)); Serial.print(" "); Serial.print(WiFi.RSSI(i)); Serial.println("dBm");
-          wsPayload = wsPayload + "{\"essid\": \"" + (WiFi.SSID(i).substring(5)) + "\", \"rssi\": " +  WiFi.RSSI(i) + " }";
+          wsPayload = wsPayload + "{\"essid\": \"" + (WiFi.SSID(i).substring(5)) + "\", \"rssi\": " + String(WiFi.RSSI(i)) + " }";
           addComma = 1;
         }
       }
       wsPayload = wsPayload + "]}";
-      sendWsPayload(wsPayload, method);
+      sendWsPayload(wsPayload, method, 1);
     }
     lastWiFiScan = millis();
   } 
@@ -170,6 +184,7 @@ void testWiFiConnection(){
     }
     Serial.print("Reconnected");
   }
+  
 }
 
 
@@ -180,25 +195,46 @@ void testWiFiConnection(){
 // loop   #####################################################################################
 
 void loop() {
-
-
-if (do_cal){
-  while(digitalRead(0)){ledInvert(); delay(50);}
-  WiFiScan("cal");
-  do_cal = 0;
-}
-
-while(game_running){
-  testWiFiConnection();
-  pollWs();
-  if(!alive){
-  WiFiScan("rssi");
+  if (do_cal){
+    ledsOn = 0;
+    digitalWrite(LEDPin1, LOW);
+    digitalWrite(LEDPin2, LOW);
+    while(digitalRead(0)){
+      ledInvert(); delay(50);
+      ledInvert(); delay(50);
+      ledInvert(); delay(50);
+      ledInvert(); delay(350);
+    }
+    WiFiScan("cal");
+    do_cal = 0;
+  } else if (ready && game_running) {
+    if (alive != ledsOn) {
+      ledInvert();
+    }
+    if(!alive){
+      WiFiScan("rssi");
+    }
+  } else if (do_ident) {
+    while (digitalRead(0)) {
+      ledInvert(); delay(25);
+    }
+    do_ident = 0;
+    // Send ackident to prevent from going into identify again
+    // If the server got ident pressed while it was already in ident
+    sendWsPayload(("{\"mac\": \"" + getmacid() + "\"}"), "ackident", 1);
   }
 
-}
+  unsigned long t = millis();
+  if (last_status + status_timeout < t || t < last_status) {
+    if (last_status_ping + status_ping_timeout < t || t < last_status_ping) {
+      last_status_ping = t;
+      sendWsPayload(("{\"mac\": \"" + getmacid() + "\"}"), "status", 0);
+    }
+  }
 
-pollWs();
-testWiFiConnection();
-
-  
+  testWiFiConnection();
+  pollWs();
+  if(!wsClient.available(false)){
+    connectWebsocket();
+  }
 }
