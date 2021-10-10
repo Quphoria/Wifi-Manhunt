@@ -35,10 +35,11 @@ def client_join(content):
         player = api_data.Player.players.get(mac, None)
         if not player:
             player = api_data.Player(mac, "Player-" + mac)
+        player.seen()
         player.joined = True
         game_status["status"] = player.nick + " connected."
-        return 200, get_status(player)
-    return 400, None
+        return 200, get_status(player), player
+    return 400, None, None
 
 def parse_signals(content) -> list:
     if "signals" in content and type(content["signals"]) == list:
@@ -57,24 +58,26 @@ def parse_signals(content) -> list:
 def client_cal(content):
     player = get_player(parse_mac(content))
     if player:
+        player.seen()
         signals = parse_signals(content)
         if signals:
             cal_sig = next(s for s in signals if s.essid == cal_essid)
             player.rssi_threshold = cal_sig.rssi
             player.cal = False
             api_data.save_players()
-            return 200, get_status(player)
-    return 400, None
+            return 200, get_status(player), player
+    return 400, None, None
 
 def client_rssi(content):
     player = get_player(parse_mac(content))
     if player:
+        player.seen()
         signals = parse_signals(content)
         if signals != None:
             player.last_signals = signals
 
             if game_status["running"] and not player.alive:
-                print("RSSI:", player.nick, signals)
+                # print("RSSI:", player.nick, signals)
                 for signal in signals:
                     if signal.rssi > player.rssi_threshold:
                         t_mac = signal.essid
@@ -82,21 +85,28 @@ def client_rssi(content):
                         if t_player and t_player.joined and t_player.alive:
                             t_player.alive = False
                         
-            return 200, get_status(player)
-    return 400, None
+            return 200, get_status(player), player
+    return 400, None, None
 
 def client_status(content):
     player = get_player(parse_mac(content))
     if player:
-        return 200, get_status(player)
-    return 400, None
+        player.seen()
+        return 200, get_status(player), player
+    return 400, None, None
 
 def client_done_ident(content):
     player = get_player(parse_mac(content))
     if player:
+        player.seen()
         player.do_ident()
-        return 200, get_status(player)
-    return 400, None
+        return 200, get_status(player), player
+    return 400, None, None
+
+def client_disconnect(player):
+    if player:
+        player.joined = False
+        game_status["status"] = player.nick + " disconnected."
 
 api_methods = {
     # Client methods
@@ -109,6 +119,7 @@ api_methods = {
 
 def parse_request(message: str) -> str:
     resp = None
+    player = None
 
     data = None
     try:
@@ -120,25 +131,32 @@ def parse_request(message: str) -> str:
         method = data["method"]
         if method in api_methods:
             try:
-                status, resp = api_methods[method](data["content"])
+                status, resp, player = api_methods[method](data["content"])
             except Exception as ex:
                 print("Unhandled method exception in method", method, ":", str(ex))
         else:
             print("Invalid method:", message)
 
-    return resp
+    return resp, player
 
 async def api(websocket, path):
     print("Connection from", websocket.remote_address)
+    player = None
     try:
         if path == "/":
             async for message in websocket:
-                r = parse_request(message)
+                r, player_obj = parse_request(message)
+                if player_obj:
+                    player = player_obj
+                    player.current_ws = websocket
                 if r:
                     await websocket.send(r)
     except (websockets.exceptions.ConnectionClosedError, OSError):
         # Sometimes windows has an OSError?
         print("Websocket connection closed:", websocket.remote_address)
+    if player.current_ws == websocket:
+        client_disconnect(player)
+
 
 web_api = Flask(__name__)
 cors = CORS(web_api)
@@ -239,7 +257,7 @@ def web_state():
 
 async def main():
     print("Starting websockets server on port 8765")
-    async with websockets.serve(api, "0.0.0.0", 8765):
+    async with websockets.serve(api, "0.0.0.0", 8765, ping_timeout=5, ping_interval=5, close_timeout=5):
         await asyncio.Future()  # run forever
 
 if __name__ == "__main__":

@@ -1,4 +1,4 @@
-import json
+import json, time
 from dataclasses import dataclass, field
 from types import resolve_bases
 from typing import ClassVar
@@ -21,6 +21,11 @@ class Player:
     alive = False
     ident = False
     cal = False
+    last_seen = 0
+    current_ws = None
+
+    def seen(self):
+        self.last_seen = time.time()
 
     def is_ready(self):
         return self.rssi_threshold != None
