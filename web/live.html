@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en" class="fontawesome-i2svg-active fontawesome-i2svg-complete">
+
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="author" content="Samuel Simpson">
+    <link rel="icon" href="images/favicon.ico">
+    <title>Wifi Manhunt</title>
+    <!-- Font Awesome CSS -->
+    <link rel="stylesheet" href="libs/fontawesome-5.15.1/font-awesome.min.css">
+    <!-- Remix icon CSS -->
+    <link rel="stylesheet" href="libs/remixicon-2.5.0/remixicon.css">
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="libs/bootstrap-4.3.1/bootstrap.min.css">
+    <!-- Roboto CSS -->
+    <link rel="stylesheet" href="libs/fonts/roboto/roboto.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="css/stylesheet.css">
+</head>
+
+<body id=about style="font-family: Roboto, sans-serif;" class="mh-100 h-100 overflow-hidden">
+    <div id="errorModal" class="modal hide fade" tabindex="-1" role="alertdialog">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 id="errorModalTitle" class="modal-title text-danger">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        &nbsp;Error
+                    </h5>
+                </div>
+                <div class="modal-body">
+                    <p id="errorModalBody">Modal body text goes here.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal" data-bs-dismiss="modal">
+                        Close
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div
+        class="wrapper bg-secondary text-light mh-100 vh-100 d-flex flex-row justify-content-between overflow-hidden flex-shrink-1">
+
+        <!-- Content -->
+        <div id="content" class="p-4 bg-secondary text-light flex-fill d-flex flex-column">
+            <div id="columns" class="d-flex flex-row justify-content-between w-100 flex-fill">
+                <div id="alive_col" class="card text-white bg-dark mb-3 flex-fill bg-opacity-50">
+                    <div class="card-header text-center">
+                        <h2>Alive</h2>
+                    </div>
+                    <ul class="player-group list-group list-group-flush">
+                        <template><li class="list-group-item list-group-item-dark">Bruh</li></template>
+                        <li class="list-group-item list-group-item-dark">Bruh</li>
+                        
+                    </ul>
+                </div>
+                <div id="middle_col" style="min-width: 35%;">
+                    <h1 id="game_running" class="text-center" style="display: none;">Game In<br>Progress</h1>
+                    <h1 id="game_stopped" class="text-center">Game<br>Over</h1>
+                </div>
+                <div id="dead_col" class="card text-white bg-dark mb-3 flex-fill bg-opacity-50">
+                    <div class="card-header text-center">
+                        <h2>Dead</h2>
+                    </div>
+                    <ul class="player-group list-group list-group-flush">
+                        <li class="list-group-item list-group-item-dark">Bruh</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>
+
+<!-- JavaScript loaded at end -->
+<!-- jQuery first, then Popper.js, then Bootstrap JS, then Fontawesome, and then custom JS scripts -->
+<script src="libs/jquery-3.1.1/jquery.min.js"></script>
+<script src="libs/popper.js-1.14.7/popper.min.js"></script>
+<script src="libs/bootstrap-4.3.1/bootstrap.min.js"></script>
+<script src="libs/fontawesome-5.15.1/all.js"></script>
+<!-- Custom JS -->
+<script src="js/live.js"></script>
