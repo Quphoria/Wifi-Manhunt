@@ -6,6 +6,12 @@ ESP8266
 
 Used module: `NodeMCU 1.0 (ESP-12E Module)`
 
+## IMPORTANT
+
+**Make sure all the access points on the backend wifi network operate on the same channel as the clients all need to be operating on the same channel**  
+
+This is to increase scanning speed by only scanning 1 channel
+
 ## Wifi Manhunt Python Server
 
 ### Creating the virtual environment

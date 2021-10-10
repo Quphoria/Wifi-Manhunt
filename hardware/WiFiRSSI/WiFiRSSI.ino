@@ -10,6 +10,10 @@
 #define LEDPin1 D0
 #define LEDPin2 D4
 
+// Enable Serial Debug For Scanning
+// Disabled by default as it sends a lot of data
+// #define ScanDebug
+
 // global vars
 bool alive = 0;
 bool game_running = 0;
@@ -112,11 +116,12 @@ void setup()
   
   // Start WiFi beacon
   Serial.print("Starting AP: "); Serial.println((GamePrefix + getmacid()));
-  WiFi.softAP((GamePrefix + getmacid()));
+  WiFi.softAP((GamePrefix + getmacid()), emptyString, 1, 0, 0);
 
   // Connect to WiFi Base
   WiFi.begin(BaseWiFiSSID, BaseWiFiPass); // base station WiFi network details
   Serial.print("Connecting");
+
   while (WiFi.status() != WL_CONNECTED)
   {
     for(int i=0; i<4; i++){
@@ -137,22 +142,31 @@ void setup()
 
 
 // scan for nearby game devices
-unsigned long interWiFiScan = 3000;
+unsigned long interWiFiScan = 250;
 unsigned long lastWiFiScan = 0;
-void WiFiScan(String method){
+void WiFiScan(String method, uint8 channel = 0){
+  // channel = 0 will scan all channels
   if ((millis() - lastWiFiScan) > interWiFiScan){
+    #ifdef ScanDebug
     Serial.println("Scanning");
-    int n = WiFi.scanNetworks();
+    #endif
+    int n = WiFi.scanNetworks(false, false, channel);
     if(n==0){
+      #ifdef ScanDebug
       Serial.println("No Networks Found");
+      #endif
     } else {
+      #ifdef ScanDebug
       Serial.print(n); Serial.println(" Networks Found, showing game networks only");
+      #endif
       String wsPayload = "{\"mac\": \"" + getmacid() + "\", \"signals\":[";
       bool addComma = 0;
       for(int i=0; i<n; i++){
         if(WiFi.SSID(i).startsWith(GamePrefix)){
           if(addComma == 1){wsPayload = wsPayload + ", ";}
-          Serial.print(i+1); Serial.print(". "); Serial.print(WiFi.SSID(i)); Serial.print(" "); Serial.print(WiFi.RSSI(i)); Serial.println("dBm");
+          #ifdef ScanDebug
+          Serial.print(i+1); Serial.print(". "); Serial.print(WiFi.SSID(i)); Serial.print(" "); Serial.print(WiFi.RSSI(i)); Serial.print("dBm CH"); Serial.println(WiFi.channel(i));
+          #endif
           wsPayload = wsPayload + "{\"essid\": \"" + (WiFi.SSID(i).substring(5)) + "\", \"rssi\": " + String(WiFi.RSSI(i)) + " }";
           addComma = 1;
         }
@@ -186,10 +200,6 @@ void testWiFiConnection(){
 }
 
 
-
-
-
-
 // loop   #####################################################################################
 
 void loop() {
@@ -197,25 +207,28 @@ void loop() {
     setLeds(0);
     while(digitalRead(0)){
       ledInvert(); delay(50);
-      if(digitalRead(0)) {break;}
+      if(!digitalRead(0)) {break;}
       ledInvert(); delay(50);
-      if(digitalRead(0)) {break;}
+      if(!digitalRead(0)) {break;}
       ledInvert(); delay(50);
-      if(digitalRead(0)) {break;}
+      if(!digitalRead(0)) {break;}
       ledInvert(); delay(350);
+      pollWs(); // Prevent WS from dying
     }
-    WiFiScan("cal");
+    WiFiScan("cal"); // Don't enforce GameWifiChannel on cal network
     do_cal = 0;
   } else if (ready && game_running) {
     if (alive != ledsOn) {
       setLeds(alive);
     }
     if(!alive){
-      WiFiScan("rssi");
+      WiFiScan("rssi", WiFi.channel());
+      // Only scan on backend wifi channel as SoftAP has to be on the same channel
     }
   } else if (do_ident) {
     while (digitalRead(0)) {
       ledInvert(); delay(25);
+      pollWs(); // Prevent WS from dying
     }
     do_ident = 0;
     // Send ackident to prevent from going into identify again
