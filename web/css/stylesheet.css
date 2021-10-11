@@ -23,3 +23,24 @@
 .player-group {
     font-size: 2em;
 }
+
+.live-bg {
+    background-color: #333333;
+    --bg-col-2: #363636;
+    background-image: repeating-linear-gradient(-45deg,
+      transparent,
+      transparent 1%,
+      var(--bg-col-2) 1%,
+      var(--bg-col-2) 2%);
+    background-size: 200% 200%;
+    animation: scroll 30s linear infinite;
+}
+
+@keyframes scroll {
+	0% {
+		background-position: 0% 0%;
+	}
+    100% {
+		background-position: 100% 100%;
+	}
+}
