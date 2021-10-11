@@ -246,6 +246,7 @@ def web_stop():
     if not game_status["running"]:
         return gen_resp(500, {"message": "Game not running"})
     game_status["running"] = False
+    return gen_resp(200, None)
 
 @web_api.route('/state', methods=['GET'])
 def web_state():
